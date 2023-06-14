@@ -7,19 +7,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model role {
-  id                     Int     @id @default(autoincrement())
-  name                   String  @db.VarChar(255)
-  users_users_roleTorole users[] @relation("users_roleTorole")
+model Role {
+  id   Int    @id @default(autoincrement())
+  name String
+  User User[]
+
+  @@map("roles")
 }
 
-model users {
-  id                    Int    @id @default(autoincrement())
-  username              String @db.VarChar(32)
-  password              String @db.VarChar(255)
-  mail                  String @db.VarChar(255)
-  role                  Int
-  role_users_roleTorole role   @relation("users_roleTorole", fields: [role], references: [id], onUpdate: Cascade, map: "users_ibfk_1")
+model User {
+  id       Int       @id @default(autoincrement())
+  username String
+  password String
+  mail     String
+  role     Role      @relation(fields: [roleId], references: [id])
+  roleId   Int
+  Post     Post[]
+  Comment  Comment[]
 
-  @@index([role], map: "role")
+  @@map("users")
+}
+
+model Post {
+  id        Int       @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  Int
+  Comment   Comment[]
+
+  @@map("posts")
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+
+  @@map("comments")
 }
